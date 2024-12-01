@@ -1,0 +1,15 @@
+{
+  "name": "trip-support-service",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon ./index.mjs",
+    "start": "node ./index.mjs"
+  },
+  "keywords": [],
+  "author": "K. S. L. Kuruppu",
+  "license": "ISC",
+  "description": "support functions for trip services in the busriya system",
+  "type": "module"
+}
