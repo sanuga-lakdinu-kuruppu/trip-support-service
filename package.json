@@ -11,5 +11,9 @@
   "author": "K. S. L. Kuruppu",
   "license": "ISC",
   "description": "support functions for trip services in the busriya system",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.8.3"
+  }
 }
