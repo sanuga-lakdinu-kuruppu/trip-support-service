@@ -6,7 +6,7 @@ createConnection();
 export const handler = async (event) => {
   console.log(`trip support service event triggered`);
   try {
-    const { internalEventType } = JSON.parse(event.detail);
+    const { internalEventType } = event.detail;
 
     if (internalEventType === "EVN_TRIP_DETAIL_FETCHED") {
       console.log(
@@ -23,7 +23,7 @@ export const handler = async (event) => {
         operator,
         conductor,
         cancellationPolicy,
-      } = JSON.parse(event.detail);
+      } = event.detail;
       await updateTripDocumentForTripCreation(
         tripId,
         startLocation,
