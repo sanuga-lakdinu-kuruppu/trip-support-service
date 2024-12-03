@@ -75,9 +75,10 @@ export const updateTripDocumentForTripCreation = async (
       description: cancellationPolicy.description,
     };
 
+    const tripDateInDate = new Date(tripDate);
     const bookingCloseMinutes = vehicle.bookingClose || 30;
     const bookingCloseAt = new Date(
-      tripDate.getTime() - bookingCloseMinutes * 60000
+      tripDateInDate.getTime() - bookingCloseMinutes * 60000
     );
 
     const newData = {
