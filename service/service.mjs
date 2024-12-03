@@ -74,14 +74,27 @@ export const updateTripDocumentForTripCreation = async (
       description: cancellationPolicy.description,
     };
 
-    console.log("schedule.departureTime:", schedule.departureTime);
-    console.log("vehicle.bookingClose:", new Date(schedule.departureTime));
+    let departureTimeCal;
+    if (
+      schedule.departureTime &&
+      /^\d{2}:\d{2}$/.test(schedule.departureTime)
+    ) {
+      const [hours, minutes] = schedule.departureTime.split(":").map(Number);
+      const today = new Date();
+      departureTimeCal = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        hours,
+        minutes
+      );
+    }
 
-    const departureTime = new Date(schedule.departureTime);
     const bookingCloseMinutes = vehicle.bookingClose || 30;
     const bookingCloseAt = new Date(
-      departureTime.getTime() - bookingCloseMinutes * 60000
+      departureTimeCal.getTime() - bookingCloseMinutes * 60000
     );
+
     const newData = {
       tripId: tripId,
       tripStatus: "SCHEDULED",
