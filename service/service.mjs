@@ -74,6 +74,9 @@ export const updateTripDocumentForTripCreation = async (
       description: cancellationPolicy.description,
     };
 
+    console.log("schedule.departureTime:", schedule.departureTime);
+    console.log("vehicle.bookingClose:", new Date(schedule.departureTime));
+
     const departureTime = new Date(schedule.departureTime);
     const bookingCloseMinutes = vehicle.bookingClose || 30;
     const bookingCloseAt = new Date(
