@@ -2,6 +2,7 @@ import { Trip } from "../model/tripModel.mjs";
 
 export const updateTripDocumentForTripCreation = async (
   tripId,
+  tripDate,
   startLocation,
   endLocation,
   route,
@@ -74,25 +75,9 @@ export const updateTripDocumentForTripCreation = async (
       description: cancellationPolicy.description,
     };
 
-    let departureTimeCal;
-    if (
-      schedule.departureTime &&
-      /^\d{2}:\d{2}$/.test(schedule.departureTime)
-    ) {
-      const [hours, minutes] = schedule.departureTime.split(":").map(Number);
-      const today = new Date();
-      departureTimeCal = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        hours,
-        minutes
-      );
-    }
-
     const bookingCloseMinutes = vehicle.bookingClose || 30;
     const bookingCloseAt = new Date(
-      departureTimeCal.getTime() - bookingCloseMinutes * 60000
+      tripDate.getTime() - bookingCloseMinutes * 60000
     );
 
     const newData = {

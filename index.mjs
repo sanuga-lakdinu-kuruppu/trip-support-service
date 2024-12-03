@@ -14,6 +14,7 @@ export const handler = async (event) => {
       );
       const {
         tripId,
+        tripDate,
         startLocation,
         endLocation,
         route,
@@ -26,6 +27,7 @@ export const handler = async (event) => {
       } = event.detail;
       await updateTripDocumentForTripCreation(
         tripId,
+        tripDate,
         startLocation,
         endLocation,
         route,
