@@ -133,6 +133,19 @@ const tripSchema = new mongoose.Schema(
         maxlength: 10,
       },
     },
+    schedule: {
+      scheduleId: {
+        type: Number,
+      },
+      departureTime: {
+        type: String,
+        trim: true,
+      },
+      arrivalTime: {
+        type: String,
+        trim: true,
+      },
+    },
     vehicle: {
       vehicleId: {
         type: Number,

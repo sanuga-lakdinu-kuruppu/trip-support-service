@@ -76,6 +76,8 @@ export const updateTripDocumentForTripCreation = async (
     };
 
     const tripDateInDate = new Date(tripDate);
+    const [hours, minutes] = schedule.departureTime.split(":").map(Number);
+    tripDateInDate.setHours(hours, minutes, 0, 0);
     const bookingCloseMinutes = vehicle.bookingClose || 30;
     const bookingCloseAt = new Date(
       tripDateInDate.getTime() - bookingCloseMinutes * 60000
