@@ -1,4 +1,9 @@
 import { Trip } from "../model/tripModel.mjs";
+import AWS from "aws-sdk";
+
+const eventBridge = new AWS.EventBridge({
+  region: process.env.FINAL_AWS_REGION,
+});
 
 export const updateTripDocumentForTripCreation = async (
   tripId,
@@ -88,14 +93,6 @@ export const updateTripDocumentForTripCreation = async (
       tripStatus: "SCHEDULED",
       bookingStatus: "ENABLED",
       bookingCloseAt: bookingCloseAt,
-      confirmedSeats: {
-        count: 0,
-        seats: [],
-      },
-      bookingInProgressSeats: {
-        count: 0,
-        seats: [],
-      },
       startLocation: startLocationData,
       endLocation: endLocationData,
       route: routeData,
@@ -112,6 +109,61 @@ export const updateTripDocumentForTripCreation = async (
       newData,
       { new: true, runValidators: true }
     );
+
+    const eventParams = {
+      Entries: [
+        {
+          Source: "trip-support-service",
+          DetailType: "BOOKING_SUPPORT_SERVICE",
+          Detail: JSON.stringify({
+            internalEventType: "EVN_TRIP_CREATED_FOR_VEHICLE_CAPACITY",
+            tripId: tripId,
+            capacity: updatedTrip.vehicle.capacity,
+          }),
+          EventBusName: "busriya.com_event_bus",
+        },
+      ],
+    };
+
+    await eventBridge.putEvents(eventParams).promise();
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+export const fetchTripDetailsAndTrigger = async (
+  bookingId,
+  tripId,
+  seatNumber
+) => {
+  try {
+    const foundTrip = await Trip.findOne({ tripId: tripId });
+    if (!foundTrip) return null;
+
+    foundTrip.bookingInProgressSeats.count += 1;
+    foundTrip.bookingInProgressSeats.seats = [
+      ...foundTrip.bookingInProgressSeats.seats,
+      seatNumber,
+    ];
+    await foundTrip.save();
+    console.log(`trip updated successfully`);
+
+    const eventParams = {
+      Entries: [
+        {
+          Source: "trip-support-service",
+          DetailType: "BOOKING_SUPPORT_SERVICE",
+          Detail: JSON.stringify({
+            internalEventType: "EVN_TRIP_DETAIL_FETCHED_FOR_BOOKING",
+            bookingId: bookingId,
+            trip: foundTrip,
+          }),
+          EventBusName: "busriya.com_event_bus",
+        },
+      ],
+    };
+
+    await eventBridge.putEvents(eventParams).promise();
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
   }
