@@ -51,17 +51,21 @@ const tripSchema = new mongoose.Schema(
     confirmedSeats: {
       count: {
         type: Number,
+        default: 0,
       },
       seats: {
         type: [String],
+        default: [],
       },
     },
     bookingInProgressSeats: {
       count: {
         type: Number,
+        default: 0,
       },
       seats: {
         type: [String],
+        default: [],
       },
     },
     startLocation: {
