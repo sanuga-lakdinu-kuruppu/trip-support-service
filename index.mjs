@@ -1,5 +1,8 @@
 import createConnection from "./config/databaseConnection.mjs";
-import { updateTripDocumentForTripCreation } from "./service/service.mjs";
+import {
+  updateTripDocumentForTripCreation,
+  fetchTripDetailsAndTrigger,
+} from "./service/service.mjs";
 
 createConnection();
 
@@ -10,7 +13,7 @@ export const handler = async (event) => {
 
     if (internalEventType === "EVN_TRIP_DETAIL_FETCHED") {
       console.log(
-        `trip support service event triggered, ${internalEventType} `
+        `1, trip support service event triggered, ${internalEventType} `
       );
       const {
         tripId,
@@ -38,6 +41,12 @@ export const handler = async (event) => {
         operator,
         cancellationPolicy
       );
+    } else if (internalEventType === "EVN_BOOKING_CREATED") {
+      console.log(
+        `2, trip support service event triggered, ${internalEventType} `
+      );
+      const { bookingId, tripId, seatNumber } = event.detail;
+      await fetchTripDetailsAndTrigger(bookingId, tripId, seatNumber);
     }
 
     console.log("trip support service event processed successfully.");
