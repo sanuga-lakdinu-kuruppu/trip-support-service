@@ -116,8 +116,9 @@ export const updateTripDocumentForTripCreation = async (
           Source: "trip-support-service",
           DetailType: "BOOKING_SUPPORT_SERVICE",
           Detail: JSON.stringify({
-            internalEventType: "EVN_TRIP_CREATED_FOR_VEHICLE_CAPACITY",
+            internalEventType: "EVN_TRIP_CREATED_FOR_TRIP_DUPLICATION",
             tripId: tripId,
+            bookingStatus: updatedTrip.bookingStatus,
             capacity: updatedTrip.vehicle.capacity,
           }),
           EventBusName: "busriya.com_event_bus",
