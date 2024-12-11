@@ -10,7 +10,7 @@ export const handler = async (event) => {
   console.log(`trip support service event triggered`);
   try {
     const { internalEventType } = event.detail;
-
+    
     if (internalEventType === "EVN_TRIP_DETAIL_FETCHED") {
       console.log(
         `1, trip support service event triggered, ${internalEventType} `
