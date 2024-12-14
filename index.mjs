@@ -2,6 +2,7 @@ import createConnection from "./config/databaseConnection.mjs";
 import {
   updateTripDocumentForTripCreation,
   fetchTripDetailsAndTrigger,
+  updateExpiredBooking,
 } from "./service/service.mjs";
 
 createConnection();
@@ -10,7 +11,7 @@ export const handler = async (event) => {
   console.log(`trip support service event triggered`);
   try {
     const { internalEventType } = event.detail;
-    
+
     if (internalEventType === "EVN_TRIP_DETAIL_FETCHED") {
       console.log(
         `1, trip support service event triggered, ${internalEventType} `
@@ -47,6 +48,12 @@ export const handler = async (event) => {
       );
       const { bookingId, tripId, seatNumber } = event.detail;
       await fetchTripDetailsAndTrigger(bookingId, tripId, seatNumber);
+    } else if (internalEventType === "EVN_BOOKING_EXPIRED") {
+      console.log(
+        `3, trip support service event triggered, ${internalEventType} `
+      );
+      const { tripId, seatNumber } = event.detail;
+      await updateExpiredBooking(tripId, seatNumber);
     }
 
     console.log("trip support service event processed successfully.");

@@ -54,7 +54,7 @@ const tripSchema = new mongoose.Schema(
         default: 0,
       },
       seats: {
-        type: [String],
+        type: [Number],
         default: [],
       },
     },
@@ -64,7 +64,7 @@ const tripSchema = new mongoose.Schema(
         default: 0,
       },
       seats: {
-        type: [String],
+        type: [Number],
         default: [],
       },
     },
