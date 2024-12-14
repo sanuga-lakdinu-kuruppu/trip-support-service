@@ -141,11 +141,12 @@ export const fetchTripDetailsAndTrigger = async (
     const foundTrip = await Trip.findOne({ tripId: tripId });
     if (!foundTrip) return null;
 
-    foundTrip.bookingInProgressSeats.count += 1;
     foundTrip.bookingInProgressSeats.seats = [
       ...foundTrip.bookingInProgressSeats.seats,
-      seatNumber,
+      Number(seatNumber),
     ];
+    foundTrip.bookingInProgressSeats.count =
+      foundTrip.bookingInProgressSeats.seats.length;
     await foundTrip.save();
     console.log(`trip updated successfully`);
 
@@ -165,6 +166,23 @@ export const fetchTripDetailsAndTrigger = async (
     };
 
     await eventBridge.putEvents(eventParams).promise();
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+export const updateExpiredBooking = async (tripId, seatNumber) => {
+  try {
+    const foundTrip = await Trip.findOne({ tripId: tripId });
+    if (!foundTrip) return null;
+
+    foundTrip.bookingInProgressSeats.seats =
+      foundTrip.bookingInProgressSeats.seats.filter(
+        (seat) => seat !== Number(seatNumber)
+      );
+    foundTrip.bookingInProgressSeats.count =
+      foundTrip.bookingInProgressSeats.seats.length;
+    await foundTrip.save();
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
   }
