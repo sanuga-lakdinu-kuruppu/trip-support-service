@@ -203,7 +203,7 @@ export const updateBookingPaymentSucess = async (tripId, seatNumber) => {
     if (!foundTrip.confirmedSeats.seats.includes(Number(seatNumber))) {
       foundTrip.confirmedSeats.seats = [
         ...foundTrip.confirmedSeats.seats,
-        seatNumberAsNumber,
+        Number(seatNumber),
       ];
       foundTrip.confirmedSeats.count = foundTrip.confirmedSeats.seats.length;
     } else {
