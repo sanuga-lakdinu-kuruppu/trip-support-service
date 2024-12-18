@@ -187,3 +187,32 @@ export const updateExpiredBooking = async (tripId, seatNumber) => {
     console.log(`trip support service error occured: ${error}`);
   }
 };
+
+export const updateBookingPaymentSucess = async (tripId, seatNumber) => {
+  try {
+    const foundTrip = await Trip.findOne({ tripId: tripId });
+    if (!foundTrip) return null;
+
+    foundTrip.bookingInProgressSeats.seats =
+      foundTrip.bookingInProgressSeats.seats.filter(
+        (seat) => seat !== Number(seatNumber)
+      );
+    foundTrip.bookingInProgressSeats.count =
+      foundTrip.bookingInProgressSeats.seats.length;
+
+    if (!foundTrip.confirmedSeats.seats.includes(Number(seatNumber))) {
+      foundTrip.confirmedSeats.seats = [
+        ...foundTrip.confirmedSeats.seats,
+        seatNumberAsNumber,
+      ];
+      foundTrip.confirmedSeats.count = foundTrip.confirmedSeats.seats.length;
+    } else {
+      console.log(
+        `Seat number ${seatNumberAsNumber} is already confirmed for trip ID: ${tripId}`
+      );
+    }
+    await foundTrip.save();
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
