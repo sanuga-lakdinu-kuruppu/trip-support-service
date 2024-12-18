@@ -3,6 +3,7 @@ import {
   updateTripDocumentForTripCreation,
   fetchTripDetailsAndTrigger,
   updateExpiredBooking,
+  updateBookingPaymentSucess,
 } from "./service/service.mjs";
 
 createConnection();
@@ -54,8 +55,13 @@ export const handler = async (event) => {
       );
       const { tripId, seatNumber } = event.detail;
       await updateExpiredBooking(tripId, seatNumber);
+    } else if (internalEventType === "EVN_BOOKING_PAYMENT_SUCCESS") {
+      console.log(
+        `4, trip support service event triggered, ${internalEventType} `
+      );
+      const { tripId, seatNumber } = event.detail;
+      await updateBookingPaymentSucess(tripId, seatNumber);
     }
-
     console.log("trip support service event processed successfully.");
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
