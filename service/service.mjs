@@ -3,6 +3,7 @@ import AWS from "aws-sdk";
 import {
   SchedulerClient,
   CreateScheduleCommand,
+  DeleteScheduleCommand,
 } from "@aws-sdk/client-scheduler";
 
 const eventBridge = new AWS.EventBridge({
@@ -261,6 +262,10 @@ export const scheduleBookingClosingEvent = async () => {
 
 export const closeBooking = async (tripId) => {
   try {
+    const params = { Name: `trip-booking-closing-${tripId}` };
+    const command = new DeleteScheduleCommand(params);
+    await schedulerClient.send(command);
+
     const foundTrip = await Trip.findOne({ tripId: tripId });
     if (!foundTrip) return null;
 
