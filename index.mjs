@@ -4,6 +4,8 @@ import {
   fetchTripDetailsAndTrigger,
   updateExpiredBooking,
   updateBookingPaymentSucess,
+  scheduleBookingClosingEvent,
+  closeBooking
 } from "./service/service.mjs";
 
 createConnection();
@@ -61,6 +63,17 @@ export const handler = async (event) => {
       );
       const { tripId, seatNumber } = event.detail;
       await updateBookingPaymentSucess(tripId, seatNumber);
+    } else if (internalEventType === "EVN_MIDNIGHT_BOOKING_CLOSE_SCHEDULER") {
+      console.log(
+        `5, trip support service event triggered, ${internalEventType} `
+      );
+      await scheduleBookingClosingEvent();
+    } else if (internalEventType === "EVN_CLOSE_BOOKING") {
+      console.log(
+        `6, trip support service event triggered, ${internalEventType} `
+      );
+      const { tripId } = event.detail;
+      await closeBooking(tripId);
     }
     console.log("trip support service event processed successfully.");
   } catch (error) {

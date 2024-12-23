@@ -32,6 +32,13 @@ const tripSchema = new mongoose.Schema(
       maxlength: 20,
       trim: true,
     },
+    bookingCloseScheduleStatus: {
+      type: String,
+      required: true,
+      default: "NOT_SCHEDULED",
+      maxlength: 20,
+      trim: true,
+    },
     tripStatus: {
       type: String,
       required: true,
