@@ -1,7 +1,14 @@
 import { Trip } from "../model/tripModel.mjs";
 import AWS from "aws-sdk";
+import {
+  SchedulerClient,
+  CreateScheduleCommand,
+} from "@aws-sdk/client-scheduler";
 
 const eventBridge = new AWS.EventBridge({
+  region: process.env.FINAL_AWS_REGION,
+});
+const schedulerClient = new SchedulerClient({
   region: process.env.FINAL_AWS_REGION,
 });
 
@@ -215,4 +222,119 @@ export const updateBookingPaymentSucess = async (tripId, seatNumber) => {
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
   }
+};
+
+export const scheduleBookingClosingEvent = async () => {
+  try {
+    const futureDays = process.env.BOOKING_CHECKING_DAYS;
+    const now = new Date();
+    const daysLater = new Date(
+      now.getTime() + Number(futureDays) * 24 * 60 * 60 * 1000
+    );
+
+    const trips = await Trip.find({
+      bookingCloseAt: {
+        $gte: now,
+        $lte: daysLater,
+      },
+      bookingCloseScheduleStatus: "NOT_SCHEDULED",
+    });
+
+    trips.forEach(async (trip) => {
+      try {
+        await createSchedule(trip);
+        const newData = {
+          bookingCloseScheduleStatus: "SCHEDULED",
+        };
+        await Trip.findOneAndUpdate({ tripId: trip.tripId }, newData, {
+          new: true,
+          runValidators: true,
+        });
+      } catch (error) {
+        console.log(`trip support service, ${trip.tripId} ,${error}`);
+      }
+    });
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+export const closeBooking = async (tripId) => {
+  try {
+    const foundTrip = await Trip.findOne({ tripId: tripId });
+    if (!foundTrip) return null;
+
+    if (foundTrip.bookingStatus !== "DISABLED") {
+      const newData = {
+        bookingStatus: "DISABLED",
+      };
+      const updatedTrip = await Trip.findOneAndUpdate(
+        { tripId: tripId },
+        newData,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+      await triggerBookingStatusChangedEvent(
+        updatedTrip.tripId,
+        updatedTrip.bookingStatus
+      );
+    }
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+const createSchedule = async (trip) => {
+  const futureTime = new Date(trip.bookingCloseAt);
+  const formattedTime = futureTime
+    .toISOString()
+    .replace(".000", "")
+    .slice(0, 19);
+
+  const inputPayload = {
+    detail: {
+      internalEventType: "EVN_CLOSE_BOOKING",
+      tripId: trip.tripId,
+    },
+  };
+
+  const scheduleName = `trip-booking-closing-${trip.tripId}`;
+
+  const params = {
+    Name: scheduleName,
+    ScheduleExpression: `at(${formattedTime})`,
+    FlexibleTimeWindow: {
+      Mode: "OFF",
+    },
+    Target: {
+      Arn: process.env.TRIP_SUPPORT_SERVICE_ARN,
+      RoleArn: process.env.SCHEDULER_ROLE_ARN,
+      Input: JSON.stringify(inputPayload),
+    },
+    Description: `Trigger for trip booking closing - ${trip.tripId}`,
+  };
+
+  const command = new CreateScheduleCommand(params);
+  const response = await schedulerClient.send(command);
+};
+
+const triggerBookingStatusChangedEvent = async (tripId, bookingStatus) => {
+  const eventParams = {
+    Entries: [
+      {
+        Source: "trip-support-service",
+        DetailType: "BOOKING_SUPPORT_SERVICE",
+        Detail: JSON.stringify({
+          internalEventType: "EVN_TRIP_BOOKING_STATUS_UPDATED",
+          tripId: tripId,
+          bookingStatus: bookingStatus,
+        }),
+        EventBusName: "busriya.com_event_bus",
+      },
+    ],
+  };
+  await eventBridge.putEvents(eventParams).promise();
 };
