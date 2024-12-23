@@ -240,7 +240,7 @@ export const scheduleBookingClosingEvent = async () => {
       bookingCloseScheduleStatus: "NOT_SCHEDULED",
     });
 
-    trips.forEach(async (trip) => {
+    for (const trip of trips) {
       try {
         await createSchedule(trip);
         const newData = {
@@ -251,9 +251,9 @@ export const scheduleBookingClosingEvent = async () => {
           runValidators: true,
         });
       } catch (error) {
-        console.log(`trip support service, ${trip.tripId} ,${error}`);
+        console.log(`trip support service, ${trip.tripId}, ${error}`);
       }
-    });
+    }
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
   }
