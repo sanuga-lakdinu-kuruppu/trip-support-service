@@ -87,7 +87,7 @@ export const handler = async (event) => {
         `8, trip support service event triggered, ${internalEventType} `
       );
       await backupTrips();
-    } 
+    }
     console.log("trip support service event processed successfully.");
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
