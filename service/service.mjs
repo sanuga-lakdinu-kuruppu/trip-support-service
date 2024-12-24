@@ -326,6 +326,31 @@ export const backupTrips = async () => {
   }
 };
 
+export const deleteTrips = async () => {
+  try {
+    console.log("Midnight deletion event triggered");
+    await deleteTripsWithBackedUpStatus();
+    console.log("Trip deletion process completed successfully.");
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+const deleteTripsWithBackedUpStatus = async () => {
+  try {
+    const result = await Trip.deleteMany({
+      backedUpStatus: "BACKED_UP",
+    });
+
+    console.log(
+      `${result.deletedCount} trips deleted with backedUpStatus: "BACKED_UP"`
+    );
+  } catch (error) {
+    console.log(`Error deleting trips: ${error}`);
+    throw new Error("Failed to delete trips.");
+  }
+};
+
 const getTripsOlderThanSevenDays = async () => {
   const pastDays = new Date();
   pastDays.setDate(
