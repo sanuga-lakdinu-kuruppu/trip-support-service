@@ -375,7 +375,7 @@ const backupTripsToS3 = async (trips) => {
 
     const params = {
       Bucket: process.env.TRIP_BUCKET_NAME,
-      Key: `backups/trips_${new Date()
+      Key: `backups/trips/trips_${new Date()
         .toISOString()
         .replace(/[-:.]/g, "")}.json`,
       Body: tripsBackup,
