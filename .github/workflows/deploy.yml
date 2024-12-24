@@ -49,7 +49,7 @@ jobs:
         run: |
           aws lambda update-function-configuration \
             --function-name trip-support-service \
-            --environment "Variables={ENVIRONMENT=${{ secrets.ENVIRONMENT }},MONGO_URI_LOCAL=${{ secrets.MONGO_URI_LOCAL }},MONGO_URI_PRODUCTION=${{ secrets.MONGO_URI_PRODUCTION }},MONGO_URI_TEST=${{ secrets.MONGO_URI_TEST }},FINAL_AWS_REGION=${{ secrets.FINAL_AWS_REGION }},BOOKING_CHECKING_DAYS=${{ secrets.BOOKING_CHECKING_DAYS }},TRIP_SUPPORT_SERVICE_ARN=${{ secrets.TRIP_SUPPORT_SERVICE_ARN }},SCHEDULER_ROLE_ARN=${{ secrets.SCHEDULER_ROLE_ARN }}}"
+            --environment "Variables={ENVIRONMENT=${{ secrets.ENVIRONMENT }},MONGO_URI_LOCAL=${{ secrets.MONGO_URI_LOCAL }},MONGO_URI_PRODUCTION=${{ secrets.MONGO_URI_PRODUCTION }},MONGO_URI_TEST=${{ secrets.MONGO_URI_TEST }},FINAL_AWS_REGION=${{ secrets.FINAL_AWS_REGION }},BOOKING_CHECKING_DAYS=${{ secrets.BOOKING_CHECKING_DAYS }},TRIP_SUPPORT_SERVICE_ARN=${{ secrets.TRIP_SUPPORT_SERVICE_ARN }},SCHEDULER_ROLE_ARN=${{ secrets.SCHEDULER_ROLE_ARN }},TRIP_BUCKET_NAME=${{ secrets.TRIP_BUCKET_NAME }},BACKUP_CHEKCING_DAYS=${{ secrets.BACKUP_CHEKCING_DAYS }}}"
 
       - name: Clean up
         run: |
