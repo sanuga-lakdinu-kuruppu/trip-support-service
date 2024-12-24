@@ -7,6 +7,7 @@ import {
   scheduleBookingClosingEvent,
   closeBooking,
   cancellBooking,
+  backupTrips,
 } from "./service/service.mjs";
 
 createConnection();
@@ -81,7 +82,12 @@ export const handler = async (event) => {
       );
       const { tripId, seatNumber } = event.detail;
       await cancellBooking(tripId, seatNumber);
-    }
+    } else if (internalEventType === "EVN_MIDNIGHT_TRIP_BACKUP") {
+      console.log(
+        `8, trip support service event triggered, ${internalEventType} `
+      );
+      await backupTrips();
+    } 
     console.log("trip support service event processed successfully.");
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
