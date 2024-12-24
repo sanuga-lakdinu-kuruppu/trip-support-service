@@ -13,6 +13,8 @@ const schedulerClient = new SchedulerClient({
   region: process.env.FINAL_AWS_REGION,
 });
 
+const s3 = new AWS.S3();
+
 export const updateTripDocumentForTripCreation = async (
   tripId,
   tripDate,
@@ -128,6 +130,7 @@ export const updateTripDocumentForTripCreation = async (
             tripId: tripId,
             bookingStatus: updatedTrip.bookingStatus,
             capacity: updatedTrip.vehicle.capacity,
+            tripDate: updatedTrip.tripDate,
           }),
           EventBusName: "busriya.com_event_bus",
         },
@@ -304,6 +307,74 @@ export const cancellBooking = async (tripId, seatNumber) => {
     await foundTrip.save();
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+export const backupTrips = async () => {
+  try {
+    console.log("Midnight backup event triggered");
+    const trips = await getTripsOlderThanSevenDays();
+    if (trips.length === 0) {
+      console.log("No trips found for backup.");
+      return;
+    }
+    await backupTripsToS3(trips);
+    await updateBackupStatus(trips);
+    console.log("Trip backup process completed successfully.");
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
+const getTripsOlderThanSevenDays = async () => {
+  const pastDays = new Date();
+  pastDays.setDate(
+    pastDays.getDate() - Number(process.env.BACKUP_CHEKCING_DAYS)
+  );
+
+  try {
+    const trips = await Trip.find({
+      tripDate: { $lt: pastDays },
+      backedUpStatus: "NOT_BACKED_UP",
+    });
+    return trips;
+  } catch (error) {
+    console.log(`Error fetching trips: ${error}`);
+    throw new Error("Failed to fetch trips.");
+  }
+};
+
+const backupTripsToS3 = async (trips) => {
+  try {
+    const tripsBackup = JSON.stringify(trips);
+
+    const params = {
+      Bucket: process.env.TRIP_BUCKET_NAME,
+      Key: `backups/trips_${new Date()
+        .toISOString()
+        .replace(/[-:.]/g, "")}.json`,
+      Body: tripsBackup,
+      ContentType: "application/json",
+    };
+
+    await s3.putObject(params).promise();
+    console.log("Trips backup uploaded successfully.");
+  } catch (error) {
+    console.log(`Error backing up trips to S3: ${error}`);
+    throw new Error("Failed to upload backup to S3.");
+  }
+};
+
+const updateBackupStatus = async (trips) => {
+  try {
+    for (const trip of trips) {
+      trip.backedUpStatus = "BACKED_UP";
+      await trip.save();
+    }
+    console.log("Backup status updated successfully.");
+  } catch (error) {
+    console.log(`Error updating backup status: ${error}`);
+    throw new Error("Failed to update backup status.");
   }
 };
 
