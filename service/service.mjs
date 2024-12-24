@@ -292,6 +292,21 @@ export const closeBooking = async (tripId) => {
   }
 };
 
+export const cancellBooking = async (tripId, seatNumber) => {
+  try {
+    const foundTrip = await Trip.findOne({ tripId: tripId });
+    if (!foundTrip) return null;
+
+    foundTrip.confirmedSeats.seats = foundTrip.confirmedSeats.seats.filter(
+      (seat) => seat !== Number(seatNumber)
+    );
+    foundTrip.confirmedSeats.count = foundTrip.confirmedSeats.seats.length;
+    await foundTrip.save();
+  } catch (error) {
+    console.log(`trip support service error occured: ${error}`);
+  }
+};
+
 const createSchedule = async (trip) => {
   const futureTime = new Date(trip.bookingCloseAt);
   const formattedTime = futureTime
