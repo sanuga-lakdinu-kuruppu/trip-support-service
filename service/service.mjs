@@ -92,14 +92,8 @@ export const updateTripDocumentForTripCreation = async (
     };
 
     const tripDateInDate = new Date(tripDate);
-    // const [hours, minutes] = schedule.departureTime.split(":").map(Number);
-    // tripDateInDate.setHours(hours, minutes, 0, 0);
-    // const bookingCloseMinutes = vehicle.bookingClose || 30;
-    // const bookingCloseAt = new Date(
-    //   tripDateInDate.getTime() - bookingCloseMinutes * 60000
-    // );
-
-    const tripDateInColombo = DateTime.fromISO(tripDateInDate, {
+    const tripDateISO = tripDateInDate.toISOString();
+    const tripDateInColombo = DateTime.fromISO(tripDateISO, {
       zone: "Asia/Colombo",
     });
     const [hours, minutes] = schedule.departureTime.split(":").map(Number);
@@ -110,16 +104,17 @@ export const updateTripDocumentForTripCreation = async (
       millisecond: 0,
     });
     const bookingCloseMinutes = vehicle.bookingClose || 30;
-    const bookingCloseAt = departureTimeInColombo.minus({
+    const bookingCloseAtColombo = departureTimeInColombo.minus({
       minutes: bookingCloseMinutes,
     });
-    const bookingCloseAtDate = bookingCloseAt.toJSDate();
+    const bookingCloseAtUTC = bookingCloseAtColombo.toUTC();
+    const bookingCloseAtUTCDate = bookingCloseAtUTC.toJSDate();
 
     const newData = {
       tripId: tripId,
       tripStatus: "SCHEDULED",
       bookingStatus: "ENABLED",
-      bookingCloseAt: bookingCloseAtDate,
+      bookingCloseAt: bookingCloseAtUTCDate,
       startLocation: startLocationData,
       endLocation: endLocationData,
       route: routeData,
