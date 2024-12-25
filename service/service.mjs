@@ -1,4 +1,5 @@
 import { Trip } from "../model/tripModel.mjs";
+import { DateTime } from "luxon";
 import AWS from "aws-sdk";
 import {
   SchedulerClient,
@@ -91,18 +92,34 @@ export const updateTripDocumentForTripCreation = async (
     };
 
     const tripDateInDate = new Date(tripDate);
+    // const [hours, minutes] = schedule.departureTime.split(":").map(Number);
+    // tripDateInDate.setHours(hours, minutes, 0, 0);
+    // const bookingCloseMinutes = vehicle.bookingClose || 30;
+    // const bookingCloseAt = new Date(
+    //   tripDateInDate.getTime() - bookingCloseMinutes * 60000
+    // );
+
+    const tripDateInColombo = DateTime.fromISO(tripDateInDate, {
+      zone: "Asia/Colombo",
+    });
     const [hours, minutes] = schedule.departureTime.split(":").map(Number);
-    tripDateInDate.setHours(hours, minutes, 0, 0);
+    const departureTimeInColombo = tripDateInColombo.set({
+      hour: hours,
+      minute: minutes,
+      second: 0,
+      millisecond: 0,
+    });
     const bookingCloseMinutes = vehicle.bookingClose || 30;
-    const bookingCloseAt = new Date(
-      tripDateInDate.getTime() - bookingCloseMinutes * 60000
-    );
+    const bookingCloseAt = departureTimeInColombo.minus({
+      minutes: bookingCloseMinutes,
+    });
+    const bookingCloseAtDate = bookingCloseAt.toJSDate();
 
     const newData = {
       tripId: tripId,
       tripStatus: "SCHEDULED",
       bookingStatus: "ENABLED",
-      bookingCloseAt: bookingCloseAt,
+      bookingCloseAt: bookingCloseAtDate,
       startLocation: startLocationData,
       endLocation: endLocationData,
       route: routeData,
