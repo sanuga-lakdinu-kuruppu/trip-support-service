@@ -222,6 +222,17 @@ export const updateBookingPaymentSucess = async (tripId, seatNumber) => {
         `Seat number ${seatNumberAsNumber} is already confirmed for trip ID: ${tripId}`
       );
     }
+
+    if (
+      foundTrip.confirmedSeats.count >= foundTrip.vehicle.capacity &&
+      foundTrip.bookingStatus !== "SOLD_OUT"
+    ) {
+      foundTrip.bookingStatus = "SOLD_OUT";
+      await triggerBookingStatusChangedEvent(
+        foundTrip.tripId,
+        foundTrip.bookingStatus
+      );
+    }
     await foundTrip.save();
   } catch (error) {
     console.log(`trip support service error occured: ${error}`);
